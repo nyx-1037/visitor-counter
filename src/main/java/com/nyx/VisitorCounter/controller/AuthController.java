@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.redis.core.RedisTemplate;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 认证控制器
+ * 提供用户登录、登出等认证相关的API接口
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -32,6 +36,13 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    /**
+     * 用户登出接口
+     * 从Redis中删除用户的JWT令牌，使其失效
+     * 
+     * @param token 请求头中的Authorization令牌
+     * @return 登出成功或失败的响应
+     */
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String token) {
         if (token != null && token.startsWith("Bearer ")) {
@@ -45,6 +56,14 @@ public class AuthController {
 
 
 
+    /**
+     * 用户登录接口
+     * 验证用户名和密码，生成JWT令牌和刷新令牌，并将JWT令牌存储在Redis中
+     * 
+     * @param authenticationRequest 包含用户名和密码的用户对象
+     * @return 包含JWT令牌和刷新令牌的响应
+     * @throws Exception 如果用户名或密码不正确
+     */
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody User authenticationRequest) throws Exception {
         try {
@@ -73,19 +92,39 @@ public class AuthController {
         return ResponseEntity.ok(new AuthResponse(jwt, refreshToken));
     }
 
+    /**
+     * 认证响应内部类
+     * 用于封装登录成功后返回的JWT令牌和刷新令牌
+     */
     static class AuthResponse {
         private final String jwt;
         private final String refreshToken;
 
+        /**
+         * 构造认证响应对象
+         * 
+         * @param jwt JWT访问令牌
+         * @param refreshToken JWT刷新令牌
+         */
         public AuthResponse(String jwt, String refreshToken) {
             this.jwt = jwt;
             this.refreshToken = refreshToken;
         }
 
+        /**
+         * 获取JWT访问令牌
+         * 
+         * @return JWT访问令牌
+         */
         public String getJwt() {
             return jwt;
         }
 
+        /**
+         * 获取JWT刷新令牌
+         * 
+         * @return JWT刷新令牌
+         */
         public String getRefreshToken() {
             return refreshToken;
         }
