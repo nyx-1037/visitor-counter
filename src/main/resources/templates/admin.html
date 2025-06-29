@@ -19,11 +19,14 @@
             padding: 48px 0 0;
             box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
             background-color: #212529;
-            width: 240px;
+            width: 280px; /* 增加侧边栏宽度 */
         }
         .sidebar .nav-link {
             color: rgba(255, 255, 255, 0.75);
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1rem; /* 增加垂直内边距 */
+            white-space: nowrap; /* 防止文字换行 */
+            overflow: hidden; /* 隐藏溢出内容 */
+            text-overflow: ellipsis; /* 显示省略号 */
         }
         .sidebar .nav-link.active {
             color: #fff;
@@ -34,9 +37,9 @@
             background-color: rgba(255, 255, 255, 0.1);
         }
         .main-content {
-            margin-left: 240px;
+            margin-left: 280px; /* 调整主内容区域的左边距 */
             padding: 20px;
-            width: calc(100% - 240px);
+            width: calc(100% - 280px); /* 调整主内容区域的宽度 */
         }
         .table-responsive {
             margin-top: 20px;
@@ -45,12 +48,13 @@
         }
         @media (max-width: 992px) {
             .sidebar {
-                width: 200px;
+                width: 240px; /* 调整小屏幕下的侧边栏宽度 */
             }
             .main-content {
-                margin-left: 200px;
-                width: calc(100% - 200px);
+                margin-left: 240px;
+                width: calc(100% - 240px);
             }
+            
         }
         @media (max-width: 768px) {
             .sidebar {
@@ -69,24 +73,28 @@
     <div class="d-flex">
         <!-- Sidebar -->
         <div class="sidebar">
-            <div class="d-flex justify-content-between align-items-center p-3">
-                <h5 class="text-white mb-0">七洛网站访问量管理面板</h5>
-                <button class="btn btn-outline-danger btn-sm" onclick="logout()"><i class="fas fa-sign-out-alt"></i> 退出登录</button>
+            <div class="d-flex flex-column align-items-center p-3">
+                <h5 class="text-white mb-3">七洛网站访问量管理面板</h5>
+
             </div>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link active" href="#users" data-bs-toggle="tab" role="tab" aria-controls="users">用户管理</a>
+                    <a class="nav-link active" href="#users" data-bs-toggle="tab" role="tab" aria-controls="users"><i class="fas fa-users me-2"></i>用户管理</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#visitors" data-bs-toggle="tab" role="tab" aria-controls="visitors">访问量管理</a>
+                    <a class="nav-link" href="#visitors" data-bs-toggle="tab" role="tab" aria-controls="visitors"><i class="fas fa-chart-bar me-2"></i>访问量管理</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#consoles" data-bs-toggle="tab" role="tab" aria-controls="consoles">日志管理</a>
+                    <a class="nav-link" href="#consoles" data-bs-toggle="tab" role="tab" aria-controls="consoles"><i class="fas fa-clipboard-list me-2"></i>日志管理</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="syncRedisToMysql()">同步数据</a>
+                    <a class="nav-link" href="#" onclick="syncRedisToMysql()" style="background-color: #ffc107; color: rgb(24, 0, 0); margin: 10px;"><i class="fas fa-sync-alt me-2"></i>同步数据</a>
                 </li>
             </ul>
+            <hr class="mx-3 my-2 bg-secondary">
+            <div class="d-flex justify-content-center p-3">
+                <button class="btn btn-outline-danger btn-sm" onclick="confirmAction('确认退出登录吗？', logout)"><i class="fas fa-sign-out-alt"></i> 退出登录</button>
+            </div>
         </div>
 
         <!-- Main content -->
