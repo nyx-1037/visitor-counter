@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>七洛网站访问量管理面板</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            padding-top: 0;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 48px 0 0;
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+            background-color: #212529;
+            width: 240px;
+        }
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.75);
+            padding: 0.5rem 1rem;
+        }
+        .sidebar .nav-link.active {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .sidebar .nav-link:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .main-content {
+            margin-left: 240px;
+            padding: 20px;
+            width: calc(100% - 240px);
+        }
+        .table-responsive {
+            margin-top: 20px;
+            width: 100%;
+            overflow-x: auto;
+        }
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 200px;
+            }
+            .main-content {
+                margin-left: 200px;
+                width: calc(100% - 200px);
+            }
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="d-flex justify-content-between align-items-center p-3">
+                <h5 class="text-white mb-0">七洛网站访问量管理面板</h5>
+                <button class="btn btn-outline-danger btn-sm" onclick="logout()"><i class="fas fa-sign-out-alt"></i> 退出登录</button>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#users" data-bs-toggle="tab" role="tab" aria-controls="users">用户管理</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#visitors" data-bs-toggle="tab" role="tab" aria-controls="visitors">访问量管理</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#consoles" data-bs-toggle="tab" role="tab" aria-controls="consoles">日志管理</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="syncRedisToMysql()">同步数据</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <h2 class="mb-4">数据管理</h2>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="users" role="tabpanel" aria-labelledby="users-tab">
+                <h3 class="mt-4">用户列表</h3>
+                <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addUserModal">添加用户</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>用户名</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <!-- User data will be loaded here -->
+                        </tbody>
+                        <tfoot id="userTableEmptyState" style="display: none;">
+                            <tr>
+                                <td colspan="4" class="text-center">暂无用户数据</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="visitors" role="tabpanel" aria-labelledby="visitors-tab">
+                <h3 class="mt-4">访问量列表</h3>
+                <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addVisitorModal">添加访问量</button>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Target</th>
+                                <th>Count</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="visitorTableBody">
+                            <!-- Visitor data will be loaded here -->
+                        </tbody>
+                        <tfoot id="visitorTableEmptyState" style="display: none;">
+                            <tr>
+                                <td colspan="6" class="text-center">暂无访问量数据</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="consoles" role="tabpanel" aria-labelledby="consoles-tab">
+                <h3 class="mt-4">日志列表</h3>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Visitor ID</th>
+                                <th>IP Address</th>
+                                <th>Create Time</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="consoleTableBody">
+                            <!-- Console data will be loaded here -->
+                        </tbody>
+                        <tfoot id="consoleTableEmptyState" style="display: none;">
+                            <tr>
+                                <td colspan="5" class="text-center">暂无日志数据</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+    </div>
+    </div>
+
+        <!-- Add User Modal -->
+        <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addUserModalLabel">添加用户</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="addUsername" class="form-label">用户名</label>
+                            <input type="text" class="form-control" id="addUsername">
+                        </div>
+                        <div class="mb-3">
+                            <label for="addPassword" class="form-label">密码</label>
+                            <input type="password" class="form-control" id="addPassword">
+                        </div>
+                        <div class="mb-3 form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="addStatus" checked>
+                            <label class="form-check-label" for="addStatus">启用</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" onclick="addUser()">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit User Modal -->
+        <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editUserModalLabel">编辑用户</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="editUserId">
+                        <div class="mb-3">
+                            <label for="editUsername" class="form-label">用户名</label>
+                            <input type="text" class="form-control" id="editUsername" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editPassword" class="form-label">密码 (留空则不修改)</label>
+                            <input type="password" class="form-control" id="editPassword">
+                        </div>
+                        <div class="mb-3 form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="editStatus">
+                            <label class="form-check-label" for="editStatus">启用</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" onclick="updateUser()">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Visitor Modal -->
+        <div class="modal fade" id="addVisitorModal" tabindex="-1" aria-labelledby="addVisitorModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addVisitorModalLabel">添加访问量</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="addVisitorTarget" class="form-label">Target</label>
+                            <input type="text" class="form-control" id="addVisitorTarget">
+                        </div>
+                        <div class="mb-3">
+                            <label for="addVisitorDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="addVisitorDescription"></textarea>
+                        </div>
+                        <div class="mb-3 form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="addVisitorStatus" checked>
+                            <label class="form-check-label" for="addVisitorStatus">启用</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" onclick="addVisitor()">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Visitor Modal -->
+        <div class="modal fade" id="editVisitorModal" tabindex="-1" aria-labelledby="editVisitorModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editVisitorModalLabel">编辑访问量</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="editVisitorId">
+                        <div class="mb-3">
+                            <label for="editVisitorTarget" class="form-label">Target</label>
+                            <input type="text" class="form-control" id="editVisitorTarget" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editVisitorCount" class="form-label">Count</label>
+                            <input type="number" class="form-control" id="editVisitorCount">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editVisitorDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="editVisitorDescription"></textarea>
+                        </div>
+                        <div class="mb-3 form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="editVisitorStatus">
+                            <label class="form-check-label" for="editVisitorStatus">启用</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" onclick="updateVisitor()">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">确认操作</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="confirmationMessage">
+                    您确定要执行此操作吗？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="confirmActionButton">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto" id="toastTitle">提示</strong>
+                <small>现在</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastMessage">
+                <!-- Message will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE_URL = '/api/admin';
+        let JWT_TOKEN = localStorage.getItem('jwtToken');
+
+        if (!JWT_TOKEN) {
+            window.location.href = '/';
+        }
+
+        // Function to show custom alert modal
+        let toastInstance = null;
+        function showAlert(message, type = 'success') { // type: success, danger, warning
+            console.log('showAlert called with message:', message, 'type:', type);
+            const toastElement = document.getElementById('liveToast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toastMessage.innerText = message;
+
+            // Reset classes
+            toastElement.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning');
+
+            // Set type-specific classes and title
+            if (type === 'success') {
+                toastElement.classList.add('text-bg-success');
+                toastTitle.innerText = '成功';
+            } else if (type === 'danger') {
+                toastElement.classList.add('text-bg-danger');
+                toastTitle.innerText = '错误';
+            } else if (type === 'warning') {
+                toastElement.classList.add('text-bg-warning');
+                toastTitle.innerText = '警告';
+            } else {
+                toastTitle.innerText = '提示';
+            }
+
+            if (!toastInstance) {
+                toastInstance = new bootstrap.Toast(toastElement);
+            }
+            toastInstance.show();
+        }
+
+        // Generic AJAX function
+        function callApi(url, method, data, successCallback, errorCallback, showAlertOnCompletion = true) {
+            $.ajax({
+                url: url,
+                type: method,
+                contentType: 'application/json',
+                headers: {
+                    'Authorization': 'Bearer ' + JWT_TOKEN
+                },
+                data: data ? JSON.stringify(data) : null,
+                success: function(response) {
+                    if (successCallback) successCallback(response);
+                    console.log('callApi success, showAlertOnCompletion:', showAlertOnCompletion);
+                    if (showAlertOnCompletion) {
+                        showAlert('操作成功！', 'success');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("API Error: ", xhr.responseText);
+                    const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : xhr.responseText;
+                    console.log('callApi error, showAlertOnCompletion:', showAlertOnCompletion);
+                    if (showAlertOnCompletion) {
+                        showAlert('操作失败: ' + errorMessage, 'danger');
+                    }
+                    if (xhr.status === 401) {
+                        window.location.href = '/'; // Redirect to login on unauthorized
+                    }
+                    if (errorCallback) errorCallback(xhr, status, error);
+                }
+            });
+        }
+
+        // Load data functions
+        function loadUsers() {
+            callApi(`${API_BASE_URL}/users`, 'GET', null, function(users) {
+                let html = '';
+                users.forEach(user => {
+                    html += `
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.username}</td>
+                            <td>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" ${user.status === 1 ? 'checked' : ''} onclick="toggleUserStatus(${user.id}, this)">
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-warning" onclick="openEditUserModal(${user.id}, '${user.username}', ${user.status})">编辑</button>
+                                <button class="btn btn-sm btn-danger" onclick="confirmDelete('user', ${user.id})">删除</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                $('#userTableBody').html(html);
+                if (users.length === 0) {
+                    $('#userTableEmptyState').show();
+                } else {
+                    $('#userTableEmptyState').hide();
+                }
+            });
+        }
+
+        function loadVisitors() {
+            callApi(`${API_BASE_URL}/visitors`, 'GET', null, function(visitors) {
+                let html = '';
+                visitors.forEach(visitor => {
+                    html += `
+                        <tr>
+                            <td>${visitor.id}</td>
+                            <td>${visitor.target}</td>
+                            <td>${visitor.count}</td>
+                            <td>${visitor.description || ''}</td>
+                            <td>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" ${visitor.status === 1 ? 'checked' : ''} onclick="toggleVisitorStatus(${visitor.id}, this)">
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-warning" onclick="openEditVisitorModal(${visitor.id}, '${visitor.target}', ${visitor.count}, '${visitor.description || ''}', ${visitor.status})">编辑</button>
+                                <button class="btn btn-sm btn-danger" onclick="confirmDelete('visitor', ${visitor.id})">删除</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                $('#visitorTableBody').html(html);
+                if (visitors.length === 0) {
+                    $('#visitorTableEmptyState').show();
+                } else {
+                    $('#visitorTableEmptyState').hide();
+                }
+            });
+        }
+
+        function loadConsoles() {
+            callApi(`${API_BASE_URL}/consoles`, 'GET', null, function(consoles) {
+                let html = '';
+                consoles.forEach(console => {
+                    html += `
+                        <tr>
+                            <td>${console.id}</td>
+                            <td>${console.visitorId}</td>
+                            <td>${console.ipAddress || ''}</td>
+                            <td>${new Date(console.createTime).toLocaleString()}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="confirmDelete('console', ${console.id})">删除</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                $('#consoleTableBody').html(html);
+                if (consoles.length === 0) {
+                    $('#consoleTableEmptyState').show();
+                } else {
+                    $('#consoleTableEmptyState').hide();
+                }
+            });
+        }
+
+        // User functions
+        function addUser() {
+            const username = $('#addUsername').val();
+            const password = $('#addPassword').val();
+            const status = $('#addStatus').prop('checked') ? 1 : 0;
+            callApi(`${API_BASE_URL}/users`, 'POST', { username, password, status }, function() {
+                $('#addUserModal').modal('hide');
+                loadUsers();
+            });
+        }
+
+        function openEditUserModal(id, username, status) {
+            $('#editUserId').val(id);
+            $('#editUsername').val(username);
+            $('#editStatus').prop('checked', status === 1);
+            $('#editPassword').val(''); // Clear password field
+            new bootstrap.Modal(document.getElementById('editUserModal')).show();
+        }
+
+        function updateUser() {
+            const id = $('#editUserId').val();
+            const username = $('#editUsername').val();
+            const password = $('#editPassword').val();
+            const status = $('#editStatus').prop('checked') ? 1 : 0;
+            const userData = { id, username, status };
+            if (password) {
+                userData.password = password;
+            }
+            callApi(`${API_BASE_URL}/users`, 'PUT', userData, function() {
+                $('#editUserModal').modal('hide');
+                loadUsers();
+            });
+        }
+
+        let currentConfirmAction = null;
+
+        function confirmAction(message, actionCallback) {
+            $('#confirmationMessage').text(message);
+            currentConfirmAction = actionCallback;
+            new bootstrap.Modal(document.getElementById('confirmationModal')).show();
+        }
+
+        $('#confirmActionButton').on('click', function() {
+            $('#confirmationModal').modal('hide');
+            if (currentConfirmAction) {
+                currentConfirmAction();
+                currentConfirmAction = null; // Reset
+            }
+        });
+
+        function confirmDelete(type, id) {
+            let message = '';
+            let deleteFunction;
+            if (type === 'user') {
+                message = '您确定要删除该用户吗？';
+                deleteFunction = () => deleteUser(id);
+            } else if (type === 'visitor') {
+                message = '您确定要删除该访问量吗？';
+                deleteFunction = () => deleteVisitor(id);
+            } else if (type === 'console') {
+                message = '您确定要删除该日志吗？';
+                deleteFunction = () => deleteConsole(id);
+            }
+            confirmAction(message, deleteFunction);
+        }
+
+        function deleteUser(id) {
+            callApi(`${API_BASE_URL}/users/${id}`, 'DELETE', null, loadUsers);
+        }
+
+        // Visitor functions
+        function addVisitor() {
+            const target = $('#addVisitorTarget').val();
+            const description = $('#addVisitorDescription').val();
+            const status = $('#addVisitorStatus').prop('checked') ? 1 : 0;
+            callApi(`${API_BASE_URL}/visitors`, 'POST', { target, description, status, count: 0 }, function() {
+                $('#addVisitorModal').modal('hide');
+                loadVisitors();
+            });
+        }
+
+        function openEditVisitorModal(id, target, count, description, status) {
+            $('#editVisitorId').val(id);
+            $('#editVisitorTarget').val(target);
+            $('#editVisitorCount').val(count);
+            $('#editVisitorDescription').val(description);
+            $('#editVisitorStatus').prop('checked', status === 1);
+            new bootstrap.Modal(document.getElementById('editVisitorModal')).show();
+        }
+
+        function updateVisitor() {
+            const id = $('#editVisitorId').val();
+            const target = $('#editVisitorTarget').val();
+            const count = $('#editVisitorCount').val();
+            const description = $('#editVisitorDescription').val();
+            const status = $('#editVisitorStatus').prop('checked') ? 1 : 0;
+            callApi(`${API_BASE_URL}/visitors`, 'PUT', { id, target, count, description, status }, function() {
+                $('#editVisitorModal').modal('hide');
+                loadVisitors();
+            });
+        }
+
+        function deleteVisitor(id) {
+            callApi(`${API_BASE_URL}/visitors/${id}`, 'DELETE', null, loadVisitors);
+        }
+
+        // Console functions
+        function deleteConsole(id) {
+            callApi(`${API_BASE_URL}/consoles/${id}`, 'DELETE', null, loadConsoles);
+        }
+
+        // Logout function
+        function logout() {
+            callApi('/api/auth/logout', 'POST', null, function() {
+                localStorage.removeItem('jwtToken');
+                window.location.href = '/';
+            });
+        }
+        
+        function syncRedisToMysql() {
+            confirmAction('确定要将 Redis 数据同步到 MySQL 吗？', function() {
+                callApi(`${API_BASE_URL}/visitors/syncRedisToMysql`, 'POST', null, function() {
+                    // 同步后重新加载数据，确保显示最新状态
+                    loadUsers();
+                    loadVisitors();
+                    loadConsoles();
+                }, null, true);
+            });
+        }
+        
+        function toggleUserStatus(id, checkbox) {
+            const status = checkbox.checked ? 1 : 0;
+            confirmAction(`确定要${status === 1 ? '启用' : '禁用'}该用户吗？`, function() {
+                callApi(`${API_BASE_URL}/users/${id}/status`, 'PUT', { status }, loadUsers, null, true);
+            });
+        }
+        
+        function toggleVisitorStatus(id, checkbox) {
+            const status = checkbox.checked ? 1 : 0;
+            confirmAction(`确定要${status === 1 ? '启用' : '禁用'}该访问量吗？`, function() {
+                callApi(`${API_BASE_URL}/visitors/${id}/status`, 'PUT', { status }, loadVisitors, null, true);
+            });
+        }
+
+        // Initial load
+        $(document).ready(function() {
+            loadUsers();
+            loadVisitors();
+            loadConsoles();
+
+            $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                const targetTab = $(e.target).attr('data-bs-target');
+                if (targetTab === '#users') {
+                    loadUsers();
+                } else if (targetTab === '#visitors') {
+                    loadVisitors();
+                } else if (targetTab === '#consoles') {
+                    loadConsoles();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
