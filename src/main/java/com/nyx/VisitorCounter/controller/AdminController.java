@@ -1,6 +1,7 @@
 package com.nyx.visitorcounter.controller;
 
 import com.nyx.visitorcounter.model.Console;
+import com.nyx.visitorcounter.model.PageResult;
 import com.nyx.visitorcounter.model.User;
 import com.nyx.visitorcounter.model.Visitor;
 import com.nyx.visitorcounter.service.ConsoleService;
@@ -21,6 +22,15 @@ public class AdminController {
     @GetMapping("/users")
     public ResponseEntity<Iterable<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
+    }
+    
+    @GetMapping("/users/page")
+    public ResponseEntity<PageResult<User>> getUsersByPage(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) Integer status) {
+        return ResponseEntity.ok(userService.getUsersByPage(pageNum, pageSize, username, status));
     }
 
     @PostMapping("/users")

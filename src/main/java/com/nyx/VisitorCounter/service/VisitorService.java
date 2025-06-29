@@ -1,6 +1,9 @@
 package com.nyx.visitorcounter.service;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.nyx.visitorcounter.model.Console;
+import com.nyx.visitorcounter.model.PageResult;
 import com.nyx.visitorcounter.model.Visitor;
 import com.nyx.visitorcounter.repository.ConsoleMapper;
 import com.nyx.visitorcounter.repository.VisitorMapper;
@@ -92,6 +95,22 @@ public class VisitorService {
             redisTemplate.opsForValue().set(CACHE_KEY_PREFIX + visitor.getTarget(), visitor);
         }
         return dbVisitors;
+    }
+    
+    /**
+     * 分页查询访问量列表，支持模糊查询
+     * @param pageNum 页码
+     * @param pageSize 每页记录数
+     * @param target 目标（模糊查询）
+     * @param description 描述（模糊查询）
+     * @param status 状态
+     * @return 分页结果
+     */
+    public PageResult<Visitor> getVisitorsByPage(int pageNum, int pageSize, String target, String description, Integer status) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<Visitor> visitors = visitorMapper.findVisitorsByPage(target, description, status);
+        PageInfo<Visitor> pageInfo = new PageInfo<>(visitors);
+        return new PageResult<>(pageInfo.getList(), pageInfo.getTotal(), pageInfo.getPageNum(), pageInfo.getPageSize(), pageInfo.getPages());
     }
 
     public void deleteVisitor(Integer id) {

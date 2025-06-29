@@ -1,5 +1,6 @@
 package com.nyx.visitorcounter.controller;
 
+import com.nyx.visitorcounter.model.PageResult;
 import com.nyx.visitorcounter.model.Visitor;
 import com.nyx.visitorcounter.service.VisitorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,16 @@ public class VisitorAdminController {
     @GetMapping
     public ResponseEntity<Iterable<Visitor>> getAllVisitors() {
         return ResponseEntity.ok(visitorService.getAllVisitors());
+    }
+    
+    @GetMapping("/page")
+    public ResponseEntity<PageResult<Visitor>> getVisitorsByPage(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String target,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) Integer status) {
+        return ResponseEntity.ok(visitorService.getVisitorsByPage(pageNum, pageSize, target, description, status));
     }
 
     @PostMapping
