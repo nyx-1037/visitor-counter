@@ -29,7 +29,7 @@ spring:
     host: localhost
     port: 6379
     password: # Your Redis password if any
-    database: 0
+    database: 7
 
 jwt:
   secret: thisIsAVeryStrongAndSecureSecretKeyForJWTGenerationAndValidation

@@ -23,6 +23,15 @@ public class AuthController {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String token) {
         if (token != null && token.startsWith("Bearer ")) {
@@ -34,14 +43,7 @@ public class AuthController {
         return ResponseEntity.badRequest().body("{\"message\":\"Invalid token\"}");
     }
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
-
-    @Autowired
-    private JwtUtil jwtUtil;
 
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody User authenticationRequest) throws Exception {

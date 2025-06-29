@@ -105,7 +105,25 @@
         <div class="tab-content">
             <div class="tab-pane fade show active" id="users" role="tabpanel" aria-labelledby="users-tab">
                 <h3 class="mt-4">用户列表</h3>
-                <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addUserModal">添加用户</button>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">添加用户</button>
+                    </div>
+                    <div class="col-md-6">
+                        <form id="userSearchForm" class="d-flex">
+                            <div class="input-group">
+                                <input type="text" id="userSearchUsername" class="form-control" placeholder="搜索用户名...">
+                                <select id="userSearchStatus" class="form-select">
+                                    <option value="">全部状态</option>
+                                    <option value="1">启用</option>
+                                    <option value="0">禁用</option>
+                                </select>
+                                <button class="btn btn-outline-secondary" type="submit">搜索</button>
+                                <button class="btn btn-outline-secondary" type="button" id="userResetBtn">重置</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped table-hover">
                         <thead class="table-dark">
@@ -126,10 +144,44 @@
                         </tfoot>
                     </table>
                 </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div>
+                        <select id="userPageSize" class="form-select form-select-sm">
+                            <option value="5">5条/页</option>
+                            <option value="10" selected>10条/页</option>
+                            <option value="20">20条/页</option>
+                            <option value="50">50条/页</option>
+                        </select>
+                    </div>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination" id="userPagination">
+                            <!-- Pagination will be generated here -->
+                        </ul>
+                    </nav>
+                </div>
             </div>
             <div class="tab-pane fade" id="visitors" role="tabpanel" aria-labelledby="visitors-tab">
                 <h3 class="mt-4">访问量列表</h3>
-                <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addVisitorModal">添加访问量</button>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addVisitorModal">添加访问量</button>
+                    </div>
+                    <div class="col-md-6">
+                        <form id="visitorSearchForm" class="d-flex">
+                            <div class="input-group">
+                                <input type="text" id="visitorSearchTarget" class="form-control" placeholder="搜索Target...">
+                                <input type="text" id="visitorSearchDescription" class="form-control" placeholder="搜索描述...">
+                                <select id="visitorSearchStatus" class="form-select">
+                                    <option value="">全部状态</option>
+                                    <option value="1">启用</option>
+                                    <option value="0">禁用</option>
+                                </select>
+                                <button class="btn btn-outline-secondary" type="submit">搜索</button>
+                                <button class="btn btn-outline-secondary" type="button" id="visitorResetBtn">重置</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped table-hover">
                         <thead class="table-dark">
@@ -152,9 +204,38 @@
                         </tfoot>
                     </table>
                 </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div>
+                        <select id="visitorPageSize" class="form-select form-select-sm">
+                            <option value="5">5条/页</option>
+                            <option value="10" selected>10条/页</option>
+                            <option value="20">20条/页</option>
+                            <option value="50">50条/页</option>
+                        </select>
+                    </div>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination" id="visitorPagination">
+                            <!-- Pagination will be generated here -->
+                        </ul>
+                    </nav>
+                </div>
             </div>
             <div class="tab-pane fade" id="consoles" role="tabpanel" aria-labelledby="consoles-tab">
                 <h3 class="mt-4">日志列表</h3>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <form id="consoleSearchForm" class="d-flex">
+                            <div class="input-group">
+                                <input type="number" id="consoleSearchVisitorId" class="form-control" placeholder="访问量ID...">
+                                <input type="text" id="consoleSearchIpAddress" class="form-control" placeholder="搜索IP地址...">
+                                <input type="datetime-local" id="consoleSearchStartTime" class="form-control" placeholder="开始时间">
+                                <input type="datetime-local" id="consoleSearchEndTime" class="form-control" placeholder="结束时间">
+                                <button class="btn btn-outline-secondary" type="submit">搜索</button>
+                                <button class="btn btn-outline-secondary" type="button" id="consoleResetBtn">重置</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped table-hover">
                         <thead class="table-dark">
@@ -175,6 +256,21 @@
                             </tr>
                         </tfoot>
                     </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div>
+                        <select id="consolePageSize" class="form-select form-select-sm">
+                            <option value="5">5条/页</option>
+                            <option value="10" selected>10条/页</option>
+                            <option value="20">20条/页</option>
+                            <option value="50">50条/页</option>
+                        </select>
+                    </div>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination" id="consolePagination">
+                            <!-- Pagination will be generated here -->
+                        </ul>
+                    </nav>
                 </div>
             </div>
     </div>
@@ -416,11 +512,73 @@
             });
         }
 
+        // 分页变量
+        let userCurrentPage = 1;
+        let userPageSize = 10;
+        let visitorCurrentPage = 1;
+        let visitorPageSize = 10;
+        let consoleCurrentPage = 1;
+        let consolePageSize = 10;
+        
+        // 生成分页控件
+        function generatePagination(elementId, currentPage, totalPages, onPageClick) {
+            const $pagination = $(`#${elementId}`);
+            $pagination.empty();
+            
+            // 上一页按钮
+            $pagination.append(`
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" aria-label="Previous" data-page="${currentPage - 1}">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            `);
+            
+            // 页码按钮
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, startPage + 4);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                $pagination.append(`
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `);
+            }
+            
+            // 下一页按钮
+            $pagination.append(`
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" aria-label="Next" data-page="${currentPage + 1}">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            `);
+            
+            // 绑定点击事件
+            $pagination.find('.page-link').on('click', function(e) {
+                e.preventDefault();
+                const page = parseInt($(this).data('page'));
+                if (page >= 1 && page <= totalPages && page !== currentPage) {
+                    onPageClick(page);
+                }
+            });
+        }
+        
         // Load data functions
-        function loadUsers() {
-            callApi(`${API_BASE_URL}/users`, 'GET', null, function(users) {
+        function loadUsers(page = 1, pageSize = 10, username = '', status = '') {
+            userCurrentPage = page;
+            userPageSize = pageSize;
+            
+            const params = new URLSearchParams();
+            params.append('pageNum', page);
+            params.append('pageSize', pageSize);
+            if (username) params.append('username', username);
+            if (status !== '') params.append('status', status);
+            
+            callApi(`${API_BASE_URL}/users/page?${params.toString()}`, 'GET', null, function(result) {
                 let html = '';
-                users.forEach(user => {
+                result.list.forEach(user => {
                     html += `
                         <tr>
                             <td>${user.id}</td>
@@ -438,18 +596,33 @@
                     `;
                 });
                 $('#userTableBody').html(html);
-                if (users.length === 0) {
+                if (result.list.length === 0) {
                     $('#userTableEmptyState').show();
                 } else {
                     $('#userTableEmptyState').hide();
                 }
+                
+                // 生成分页控件
+                generatePagination('userPagination', result.pageNum, result.pages, function(page) {
+                    loadUsers(page, userPageSize, username, status);
+                });
             });
         }
 
-        function loadVisitors() {
-            callApi(`${API_BASE_URL}/visitors`, 'GET', null, function(visitors) {
+        function loadVisitors(page = 1, pageSize = 10, target = '', description = '', status = '') {
+            visitorCurrentPage = page;
+            visitorPageSize = pageSize;
+            
+            const params = new URLSearchParams();
+            params.append('pageNum', page);
+            params.append('pageSize', pageSize);
+            if (target) params.append('target', target);
+            if (description) params.append('description', description);
+            if (status !== '') params.append('status', status);
+            
+            callApi(`${API_BASE_URL}/visitors/page?${params.toString()}`, 'GET', null, function(result) {
                 let html = '';
-                visitors.forEach(visitor => {
+                result.list.forEach(visitor => {
                     html += `
                         <tr>
                             <td>${visitor.id}</td>
@@ -469,18 +642,34 @@
                     `;
                 });
                 $('#visitorTableBody').html(html);
-                if (visitors.length === 0) {
+                if (result.list.length === 0) {
                     $('#visitorTableEmptyState').show();
                 } else {
                     $('#visitorTableEmptyState').hide();
                 }
+                
+                // 生成分页控件
+                generatePagination('visitorPagination', result.pageNum, result.pages, function(page) {
+                    loadVisitors(page, visitorPageSize, target, description, status);
+                });
             });
         }
 
-        function loadConsoles() {
-            callApi(`${API_BASE_URL}/consoles`, 'GET', null, function(consoles) {
+        function loadConsoles(page = 1, pageSize = 10, visitorId = '', ipAddress = '', startTime = '', endTime = '') {
+            consoleCurrentPage = page;
+            consolePageSize = pageSize;
+            
+            const params = new URLSearchParams();
+            params.append('pageNum', page);
+            params.append('pageSize', pageSize);
+            if (visitorId) params.append('visitorId', visitorId);
+            if (ipAddress) params.append('ipAddress', ipAddress);
+            if (startTime) params.append('startTime', startTime);
+            if (endTime) params.append('endTime', endTime);
+            
+            callApi(`${API_BASE_URL}/consoles/page?${params.toString()}`, 'GET', null, function(result) {
                 let html = '';
-                consoles.forEach(console => {
+                result.list.forEach(console => {
                     html += `
                         <tr>
                             <td>${console.id}</td>
@@ -494,11 +683,16 @@
                     `;
                 });
                 $('#consoleTableBody').html(html);
-                if (consoles.length === 0) {
+                if (result.list.length === 0) {
                     $('#consoleTableEmptyState').show();
                 } else {
                     $('#consoleTableEmptyState').hide();
                 }
+                
+                // 生成分页控件
+                generatePagination('consolePagination', result.pageNum, result.pages, function(page) {
+                    loadConsoles(page, consolePageSize, visitorId, ipAddress, startTime, endTime);
+                });
             });
         }
 
@@ -660,6 +854,75 @@
                     loadVisitors();
                 } else if (targetTab === '#consoles') {
                     loadConsoles();
+                }
+            });
+            
+            // 用户搜索表单提交事件
+            $('#userSearchForm').on('submit', function(e) {
+                e.preventDefault();
+                const username = $('#userSearchUsername').val();
+                const status = $('#userSearchStatus').val();
+                const pageSize = $('#userPageSize').val();
+                loadUsers(1, pageSize, username, status);
+            });
+            
+            // 用户搜索重置按钮事件
+            $('#userResetBtn').on('click', function() {
+                $('#userSearchUsername').val('');
+                $('#userSearchStatus').val('');
+                loadUsers(1, $('#userPageSize').val(), '', '');
+            });
+            
+            // 访问量搜索表单提交事件
+            $('#visitorSearchForm').on('submit', function(e) {
+                e.preventDefault();
+                const target = $('#visitorSearchTarget').val();
+                const description = $('#visitorSearchDescription').val();
+                const status = $('#visitorSearchStatus').val();
+                const pageSize = $('#visitorPageSize').val();
+                loadVisitors(1, pageSize, target, description, status);
+            });
+            
+            // 访问量搜索重置按钮事件
+            $('#visitorResetBtn').on('click', function() {
+                $('#visitorSearchTarget').val('');
+                $('#visitorSearchDescription').val('');
+                $('#visitorSearchStatus').val('');
+                loadVisitors(1, $('#visitorPageSize').val(), '', '', '');
+            });
+            
+            // 日志搜索表单提交事件
+            $('#consoleSearchForm').on('submit', function(e) {
+                e.preventDefault();
+                const visitorId = $('#consoleSearchVisitorId').val();
+                const ipAddress = $('#consoleSearchIpAddress').val();
+                const startTime = $('#consoleSearchStartTime').val();
+                const endTime = $('#consoleSearchEndTime').val();
+                const pageSize = $('#consolePageSize').val();
+                loadConsoles(1, pageSize, visitorId, ipAddress, startTime, endTime);
+            });
+            
+            // 日志搜索重置按钮事件
+            $('#consoleResetBtn').on('click', function() {
+                $('#consoleSearchVisitorId').val('');
+                $('#consoleSearchIpAddress').val('');
+                $('#consoleSearchStartTime').val('');
+                $('#consoleSearchEndTime').val('');
+                loadConsoles(1, $('#consolePageSize').val(), '', '', '', '');
+            });
+            
+            // 每页显示条数变更事件
+            $('#userPageSize, #visitorPageSize, #consolePageSize').on('change', function() {
+                const id = $(this).attr('id');
+                const pageSize = $(this).val();
+                
+                if (id === 'userPageSize') {
+                    loadUsers(1, pageSize, $('#userSearchUsername').val(), $('#userSearchStatus').val());
+                } else if (id === 'visitorPageSize') {
+                    loadVisitors(1, pageSize, $('#visitorSearchTarget').val(), $('#visitorSearchDescription').val(), $('#visitorSearchStatus').val());
+                } else if (id === 'consolePageSize') {
+                    loadConsoles(1, pageSize, $('#consoleSearchVisitorId').val(), $('#consoleSearchIpAddress').val(), 
+                                 $('#consoleSearchStartTime').val(), $('#consoleSearchEndTime').val());
                 }
             });
         });

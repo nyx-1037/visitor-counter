@@ -98,6 +98,13 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.24</version>
+        </dependency>
+        
+        <!-- PageHelper for pagination -->
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <version>1.4.2</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
