@@ -23,7 +23,7 @@
   - `invalid.ip` → API返回失败状态
 
 - ✅ **空IP测试**：正确处理空IP地址
-
+ 
 ### 2. 实际应用中的情况
 
 从应用程序日志 `visitor-counter.log` 可以看出：
