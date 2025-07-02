@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `console_tb`;
 CREATE TABLE `console_tb`  (
   `id` int NOT NULL COMMENT '日志记录表主键id',
   `visitor_id` int NOT NULL COMMENT '访问量关联表id',
-  `ip_address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '访问源ip记录',
+  `ip_address` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '访问源ip记录及地理位置信息',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间（精确到秒）',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;

@@ -28,4 +28,15 @@
         </where>
         ORDER BY create_time DESC
     </select>
+    
+    <!-- 获取最近7天的访问量趋势数据 -->
+    <select id="getVisitTrendLast7Days" resultType="java.util.Map">
+        SELECT 
+            DATE(create_time) as date,
+            COUNT(*) as count
+        FROM console_tb 
+        WHERE create_time >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+        GROUP BY DATE(create_time)
+        ORDER BY date ASC
+    </select>
 </mapper>
