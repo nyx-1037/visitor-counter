@@ -183,4 +183,66 @@ public class ConsoleService {
         consoleSyncScheduler.syncRedisToMysqlWithBatch(30, 200);
         logger.info("完成手动触发Redis控制台日志同步");
     }
+    
+    /**
+     * 获取今日访问量
+     * @return 今日访问量
+     */
+    public long getTodayVisitCount() {
+        try {
+            // 获取今天的开始时间
+            LocalDateTime startOfDay = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+            
+            // 先从Redis获取今日访问记录
+            Set<String> keys = redisTemplate.keys(CACHE_KEY_PREFIX + "*");
+            long todayCount = 0;
+            
+            if (keys != null && !keys.isEmpty()) {
+                for (String key : keys) {
+                    Object obj = redisTemplate.opsForValue().get(key);
+                    if (obj instanceof Console) {
+                        Console console = (Console) obj;
+                        if (console.getCreateTime() != null && console.getCreateTime().isAfter(startOfDay)) {
+                            todayCount++;
+                        }
+                    }
+                }
+            } else {
+                // 如果Redis中没有数据，从数据库获取
+                todayCount = consoleMapper.countTodayVisits();
+            }
+            
+            return todayCount;
+        } catch (Exception e) {
+            logger.error("获取今日访问量失败", e);
+            return 0;
+        }
+    }
+    
+    /**
+     * 获取最近7天的访问量趋势
+     * @return 访问量趋势数据
+     */
+    public List<java.util.Map<String, Object>> getVisitTrend() {
+        try {
+            return consoleMapper.getVisitTrendLast7Days();
+        } catch (Exception e) {
+            logger.error("获取访问量趋势失败", e);
+            return new java.util.ArrayList<>();
+        }
+    }
+    
+    /**
+     * 获取最近访问记录
+     * @param limit 记录数量限制
+     * @return 最近访问记录列表
+     */
+    public List<java.util.Map<String, Object>> getRecentVisits(int limit) {
+        try {
+            return consoleMapper.getRecentVisits(limit);
+        } catch (Exception e) {
+            logger.error("获取最近访问记录失败", e);
+            return new java.util.ArrayList<>();
+        }
+    }
 }

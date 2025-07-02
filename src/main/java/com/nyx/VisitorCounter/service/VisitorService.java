@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import com.nyx.visitorcounter.util.IpUtil;
 
 
 /**
@@ -72,7 +73,8 @@ public class VisitorService {
      * @return 更新后的访问量计数，如果目标不存在或未激活则返回-1
      */
     public Long incrementVisitorCount(String target, HttpServletRequest request) {
-        logger.info("增加访问量计数，目标: {}, IP: {}", target, request.getRemoteAddr());
+        String realIp = IpUtil.getClientIpAddress(request);
+        logger.info("增加访问量计数，目标: {}, 真实IP: {}, 代理IP: {}", target, realIp, request.getRemoteAddr());
         Object cached = redisTemplate.opsForValue().get(CACHE_KEY_PREFIX + target);
         logger.debug("缓存对象类型: {}", (cached != null ? cached.getClass().getName() : "null"));
         if (cached instanceof Visitor) {
@@ -89,12 +91,12 @@ public class VisitorService {
                 // Create console log and save to Redis only
                 Console console = new Console();
                 console.setVisitorId(visitor.getId());
-                console.setIpAddress(request.getRemoteAddr());
+                console.setIpAddress(realIp);
                 console.setCreateTime(LocalDateTime.now());
                 
                 // Save console to Redis via ConsoleService
                 consoleService.saveConsole(console);
-                logger.debug("记录控制台日志到Redis，访问量ID: {}, IP: {}", visitor.getId(), request.getRemoteAddr());
+                logger.debug("记录控制台日志到Redis，访问量ID: {}, 真实IP: {}", visitor.getId(), realIp);
 
                 return visitor.getCount();
             } else {
@@ -332,6 +334,108 @@ public class VisitorService {
             logger.info("访问量记录状态更新成功，ID: {}, 新状态: {}", id, status);
         } else {
             logger.warn("无法更新访问量记录状态，ID: {}不存在", id);
+        }
+    }
+    
+    /**
+     * 获取总访问量
+     * @return 总访问量
+     */
+    public long getTotalVisitorCount() {
+        try {
+            // 先从Redis获取所有访问量记录
+            Set<String> keys = redisTemplate.keys(CACHE_KEY_PREFIX + "*");
+            long totalCount = 0;
+            
+            if (keys != null && !keys.isEmpty()) {
+                for (String key : keys) {
+                    Object obj = redisTemplate.opsForValue().get(key);
+                    if (obj instanceof Visitor) {
+                        Visitor visitor = (Visitor) obj;
+                        if (visitor.getStatus() == 1) { // 只统计启用状态的
+                            totalCount += visitor.getCount();
+                        }
+                    }
+                }
+            } else {
+                // 如果Redis中没有数据，从数据库获取
+                List<Visitor> visitors = visitorMapper.selectAll();
+                for (Visitor visitor : visitors) {
+                    if (visitor.getStatus() == 1) {
+                        totalCount += visitor.getCount();
+                    }
+                }
+            }
+            
+            return totalCount;
+        } catch (Exception e) {
+            logger.error("获取总访问量失败", e);
+            return 0;
+        }
+    }
+    
+    /**
+     * 获取网站数量
+     * @return 网站数量
+     */
+    public long getTotalSiteCount() {
+        try {
+            // 先从Redis获取
+            Set<String> keys = redisTemplate.keys(CACHE_KEY_PREFIX + "*");
+            if (keys != null && !keys.isEmpty()) {
+                return keys.size();
+            } else {
+                // 从数据库获取
+                return visitorMapper.countAll();
+            }
+        } catch (Exception e) {
+            logger.error("获取网站数量失败", e);
+            return 0;
+        }
+    }
+    
+    /**
+     * 获取网站访问量分布数据
+     * @return 网站访问量分布列表
+     */
+    public List<java.util.Map<String, Object>> getSiteDistribution() {
+        try {
+            List<java.util.Map<String, Object>> result = new java.util.ArrayList<>();
+            
+            // 先从Redis获取
+            Set<String> keys = redisTemplate.keys(CACHE_KEY_PREFIX + "*");
+            if (keys != null && !keys.isEmpty()) {
+                for (String key : keys) {
+                    Object obj = redisTemplate.opsForValue().get(key);
+                    if (obj instanceof Visitor) {
+                        Visitor visitor = (Visitor) obj;
+                        if (visitor.getStatus() == 1) {
+                            java.util.Map<String, Object> item = new java.util.HashMap<>();
+                            item.put("target", visitor.getTarget());
+                            item.put("description", visitor.getDescription());
+                            item.put("count", visitor.getCount());
+                            result.add(item);
+                        }
+                    }
+                }
+            } else {
+                // 从数据库获取
+                List<Visitor> visitors = visitorMapper.selectAll();
+                for (Visitor visitor : visitors) {
+                    if (visitor.getStatus() == 1) {
+                        java.util.Map<String, Object> item = new java.util.HashMap<>();
+                        item.put("target", visitor.getTarget());
+                        item.put("description", visitor.getDescription());
+                        item.put("count", visitor.getCount());
+                        result.add(item);
+                    }
+                }
+            }
+            
+            return result;
+        } catch (Exception e) {
+            logger.error("获取网站访问量分布失败", e);
+            return new java.util.ArrayList<>();
         }
     }
 }

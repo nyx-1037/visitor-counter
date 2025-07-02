@@ -108,4 +108,17 @@ public class UserService {
             userMapper.updateById(user);
         }
     }
+    
+    /**
+     * 获取用户总数
+     * @return 用户总数
+     */
+    public long getTotalUserCount() {
+        try {
+            List<User> users = userMapper.selectList(null);
+            return users != null ? users.size() : 0;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
 }

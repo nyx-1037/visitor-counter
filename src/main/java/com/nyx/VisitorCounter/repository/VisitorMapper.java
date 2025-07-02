@@ -23,4 +23,18 @@ public interface VisitorMapper extends BaseMapper<Visitor> {
     List<Visitor> findVisitorsByPage(@Param("target") String target, 
                                     @Param("description") String description, 
                                     @Param("status") Integer status);
+    
+    /**
+     * 统计访问量记录总数
+     * @return 访问量记录总数
+     */
+    @Select("SELECT COUNT(*) FROM visitor_tb")
+    long countAll();
+    
+    /**
+     * 查询所有访问量记录
+     * @return 所有访问量记录列表
+     */
+    @Select("SELECT * FROM visitor_tb")
+    List<Visitor> selectAll();
 }
