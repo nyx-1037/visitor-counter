@@ -35,7 +35,7 @@ public class Console {
     private Integer visitorId;
 
     /**
-     * 访问者的IP地址
+     * 访问者的IP地址及地理位置信息
      */
     @TableField("ip_address")
     private String ipAddress;

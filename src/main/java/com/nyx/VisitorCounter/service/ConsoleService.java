@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.nyx.visitorcounter.model.Console;
 import com.nyx.visitorcounter.model.PageResult;
 import com.nyx.visitorcounter.repository.ConsoleMapper;
+import com.nyx.visitorcounter.service.IpLocationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,9 @@ public class ConsoleService {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
+    @Autowired
+    private IpLocationService ipLocationService;
+
     private final String CACHE_KEY_PREFIX = "console:";
 
     /**
@@ -47,6 +51,23 @@ public class ConsoleService {
      */
     public Console saveConsole(Console console) {
         logger.debug("保存控制台日志，访问量ID: {}, IP: {}", console.getVisitorId(), console.getIpAddress());
+        
+        // 查询并设置IP地理位置信息，合并到IP地址字段中
+         if (console.getIpAddress() != null && !console.getIpAddress().isEmpty()) {
+             try {
+                 String originalIp = console.getIpAddress();
+                 String location = ipLocationService.getLocationByIp(originalIp);
+                 // 将IP地址和地理位置合并显示，格式：IP地址 (地理位置)
+                 String combinedInfo = originalIp + " (" + location + ")";
+                 console.setIpAddress(combinedInfo);
+                 logger.debug("IP: {} 的合并信息: {}", originalIp, combinedInfo);
+             } catch (Exception e) {
+                 logger.warn("获取IP地理位置失败，IP: {}, 错误: {}", console.getIpAddress(), e.getMessage());
+                 String originalIp = console.getIpAddress();
+                 console.setIpAddress(originalIp + " (未知位置)");
+             }
+         }
+        
         // Generate a temporary ID if not set
         if (console.getId() == null) {
             // Use Redis to generate a unique ID
