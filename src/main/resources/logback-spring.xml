@@ -47,6 +47,18 @@
         <appender-ref ref="FILE" />
     </logger>
     
+    <!-- IP地理位置服务日志 -->
+    <logger name="com.nyx.visitorcounter.service.IpLocationService" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </logger>
+
+    <!-- IP工具类日志 -->
+    <logger name="com.nyx.visitorcounter.util.IpUtil" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </logger>
+    
     <!-- 根日志级别 -->
     <root level="INFO">
         <appender-ref ref="CONSOLE" />

@@ -49,10 +49,12 @@ public class IpLocationService {
         }
         
         try {
-            logger.debug("开始查询IP地址地理位置: {}", ipAddress);
+            logger.info("开始查询公网IP地址地理位置: {}", ipAddress);
             
             // 调用ip-api.com API
             String response = restTemplate.getForObject(IP_API_URL, String.class, ipAddress);
+            
+            logger.info("API响应内容，IP: {}, 响应: {}", ipAddress, response);
             
             if (response == null || response.trim().isEmpty()) {
                 logger.warn("API返回空响应，IP: {}", ipAddress);
@@ -64,10 +66,12 @@ public class IpLocationService {
             
             // 检查API调用是否成功
             String status = jsonNode.path("status").asText();
+            logger.info("API查询状态，IP: {}, 状态: {}", ipAddress, status);
+            
             if (!"success".equals(status)) {
-                logger.warn("API查询失败，IP: {}, 状态: {}, 消息: {}", 
-                    ipAddress, status, jsonNode.path("message").asText());
-                return "查询失败";
+                String message = jsonNode.path("message").asText("未知错误");
+                logger.warn("API查询失败，IP: {}, 状态: {}, 消息: {}", ipAddress, status, message);
+                return "查询失败: " + message;
             }
             
             // 提取地理位置信息
@@ -76,35 +80,38 @@ public class IpLocationService {
             String city = jsonNode.path("city").asText("");
             String isp = jsonNode.path("isp").asText("");
             
+            logger.info("解析地理位置信息，IP: {}, 国家: {}, 省份: {}, 城市: {}, 运营商: {}", 
+                ipAddress, country, regionName, city, isp);
+            
             // 构建地理位置字符串
             StringBuilder location = new StringBuilder();
             
-            if (!country.isEmpty()) {
+            if (!country.isEmpty() && !"null".equals(country)) {
                 location.append(country);
             }
             
-            if (!regionName.isEmpty()) {
+            if (!regionName.isEmpty() && !"null".equals(regionName)) {
                 if (location.length() > 0) location.append("-");
                 location.append(regionName);
             }
             
-            if (!city.isEmpty()) {
+            if (!city.isEmpty() && !"null".equals(city)) {
                 if (location.length() > 0) location.append("-");
                 location.append(city);
             }
             
-            if (!isp.isEmpty()) {
+            if (!isp.isEmpty() && !"null".equals(isp)) {
                 if (location.length() > 0) location.append("-");
                 location.append(isp);
             }
             
             String result = location.length() > 0 ? location.toString() : "未知位置";
-            logger.debug("IP地址 {} 的地理位置查询结果: {}", ipAddress, result);
+            logger.info("IP地址 {} 的地理位置查询最终结果: {}", ipAddress, result);
             
             return result;
             
         } catch (RestClientException e) {
-            logger.error("网络请求异常，IP: {}, 错误: {}", ipAddress, e.getMessage());
+            logger.error("网络请求异常，IP: {}, 错误详情: {}", ipAddress, e.getMessage(), e);
             return "网络异常";
         } catch (Exception e) {
             logger.error("查询IP地理位置时发生异常，IP: {}", ipAddress, e);
